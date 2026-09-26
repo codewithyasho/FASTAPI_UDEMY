@@ -24,7 +24,6 @@ def root():
 
 
 # if it is a get request, we will send the pincode in the url path.
-# so we will use path parameter to get the pincode from the url.
 @app.get("/pincode/{code}", response_model=PincodeResponse)
 def pincode_lookup(code: str):
     if len(code) != 6 or not code.isdigit():
@@ -36,8 +35,20 @@ def pincode_lookup(code: str):
     return pincode_db[code]
 
 
-# whenever sending the post request, 
-# we will send the data in json format in the body of the request.
+# if it is a post request, we will send the pincode in the request body in JSON format.
+@app.post("/pincode", response_model=PincodeResponse)
+def pincode_lookup_post(request: PincodeRequest):
+    code = request.pincode
+
+    if len(code) != 6 or not code.isdigit():
+        raise PinCodeNotFoundError(code)
+
+    if code not in pincode_db:
+        raise PinCodeNotFoundError(code)
+
+    return pincode_db[code]
+
+
 @app.post("/pincode/bulk", response_model=BulkResponse)
 def bulk_pincode_lookup(request: BulkResquest):
     restults = []
