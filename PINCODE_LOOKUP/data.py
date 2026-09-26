@@ -1,0 +1,92 @@
+pincode_db = {
+    "411001": {
+        "pincode": "411001",
+        "city": "Pune",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411002": {
+        "pincode": "411002",
+        "city": "Pune",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411003": {
+        "pincode": "411003",
+        "city": "Pune",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411005": {
+        "pincode": "411005",
+        "city": "Pune",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411007": {
+        "pincode": "411007",
+        "city": "Pune",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411009": {
+        "pincode": "411009",
+        "city": "Pune",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411017": {
+        "pincode": "411017",
+        "city": "Pimpri",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411018": {
+        "pincode": "411018",
+        "city": "Pimpri",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411019": {
+        "pincode": "411019",
+        "city": "Chinchwad",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411026": {
+        "pincode": "411026",
+        "city": "Bhosari",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411027": {
+        "pincode": "411027",
+        "city": "Pune",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411028": {
+        "pincode": "411028",
+        "city": "Hadapsar",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411033": {
+        "pincode": "411033",
+        "city": "Chinchwad",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411034": {
+        "pincode": "411034",
+        "city": "Kasarwadi",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+    "411035": {
+        "pincode": "411035",
+        "city": "Akurdi",
+        "state": "Maharashtra",
+        "district": "Pune",
+    },
+}
