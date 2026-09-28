@@ -7,28 +7,35 @@ from database import get_session
 router = APIRouter(prefix="/review", tags=["reviews"])
 
 
-# This endpoint CREATES and SAVES a single new review sent by a user
-@router.post("/", response_model=ReadReview)
-def create_review(review: CreateReview, session: Session = Depends(get_session)):
-    # 1. Convert the incoming user data into an official SQLModel database row item
-    db_review = Review(**review.model_dump())
+# ENDPOINT 1: this endpoint will list all the plays with its reviews.
+@router.get("/list", response_model=list[ReadReview], description="List all the plays with its reviews")
+def list_reviews(session: Session = Depends(get_session)):
+    # sqlmodel way of writing the SQL queries
+    query = select(Review)
 
-    # 2. Place the new review item into Python's temporary database "shopping cart"
-    session.add(db_review)
+    reviews = session.exec(query).all()
 
-    # 3. Press the "checkout" button to permanently write and save it into the database file
-    session.commit()
-
-    # 4. Refresh the item to pull in database-generated data (like its new unique ID)
-    session.refresh(db_review)
-
-    # 5. Return the newly created review back to the user to confirm it was successfully saved
-    return db_review
+    return reviews
 
 
-# this endpoint will list the reviews with filter and pagination
-@router.get("/", response_model=list[ReadReview])
-def list_review(
+# ENDPOINT 2: this endpoint will list all the unique plays only.
+@router.get("/list/plays", response_model=list[str], description="List all the unique plays")
+def list_plays(session: Session = Depends(get_session)):
+    # sqlmodel way of writing the SQL queries
+    query = select(Review.play_name).distinct()
+
+    plays = session.exec(query).all()
+
+    return plays
+
+
+# ENDPOINT 3: this endpoint will list all the reviews with filter and pagination of a particular play.
+@router.get(
+    "/filter",
+    response_model=list[ReadReview],
+    description="List all the reviews of a particular play with filter and pagination"
+)
+def filter_reviews(
     playname: str | None = Query(
         default=None, description="filter by playname"),
     # offset
@@ -36,11 +43,14 @@ def list_review(
     limit: int = Query(10, ge=1, le=50, description="Max reviews to return"),
     session: Session = Depends(get_session)
 ):
-    # sqlmodel way of writing the SQL queries
+
+    if not playname:
+        raise HTTPException(
+            status_code=400, detail="Please provide a playname to filter reviews.")
+
     query = select(Review)
 
-    if playname:
-        query = query.where(Review.play_name == playname)
+    query = query.where(Review.play_name == playname)
 
     query = query.offset(skip).limit(limit)
 
@@ -49,8 +59,29 @@ def list_review(
     return reviews
 
 
-# endpoint for dispalying the avg of the ratings for a particular play
-@router.get("/average/{playname}")
+# ENDPOINT 4: This endpoint CREATE, SAVE and DISPLAYS a single new review sent by a user
+@router.post("/create", response_model=ReadReview, description="Create a new review for a play")
+def create_review(review: CreateReview, session: Session = Depends(get_session)):
+
+    db_review = Review(**review.model_dump())
+    session.add(db_review)
+    session.commit()
+    session.refresh(db_review)
+    return db_review
+
+
+# ENDPOINT 5: this endpoint displays the top 3 plays with its reviews.
+@router.get("/top3", response_model=list[ReadReview], description="List the top 3 plays")
+def get_top3_plays(session: Session = Depends(get_session)):
+    query = select(Review).order_by(Review.rating.desc()).limit(3)
+
+    top3_reviews = session.exec(query).all()
+
+    return top3_reviews
+
+
+# ENDPOINT 6: this is the endpoint for dispalying the avg of the ratings for a particular play.
+@router.get("/average/{playname}", description="Get the average rating for a particular play")
 def get_avg_rating(playname: str, session: Session = Depends(get_session)):
 
     # sqlmodel way of writing the SQL queries
@@ -62,7 +93,7 @@ def get_avg_rating(playname: str, session: Session = Depends(get_session)):
 
     avg_rating, total_reviews_count = result
 
-    verdict = "People Dislike it." if avg_rating < 3.0 else "People are Loving it."
+    verdict = "People Dislike it." if avg_rating < 3 else "People are Loving it."
 
     if total_reviews_count == 0:
         raise HTTPException(
@@ -71,23 +102,32 @@ def get_avg_rating(playname: str, session: Session = Depends(get_session)):
     return {
         "play_name": playname,
         "total_reviews": total_reviews_count,
-        "average_rating": avg_rating,
+        "average_rating": round(avg_rating, 2),
         "final_verdict": verdict
     }
 
 
-@router.get("/{review_id}", response_model=ReadReview)
-def get_review_by_id(review_id: str, session: Session = Depends(get_session)):
-    review = session.get(Review, review_id)
+# ENDPOINT 7: Get all reviews by play name
+@router.get("/play/{play_name}", response_model=list[ReadReview])
+def get_reviews_by_play(
+    play_name: str,
+    session: Session = Depends(get_session)
+):
+    statement = select(Review).where(Review.play_name == play_name)
 
-    if not review:
+    reviews = session.exec(statement).all()
+
+    if not reviews:
         raise HTTPException(
-            status_code=404, detail=f"NO review found of id: {review_id}")
+            status_code=404,
+            detail=f"No reviews found for play: {play_name}"
+        )
 
-    return review
+    return reviews
 
 
-@router.patch("/{review_id}", response_model=ReadReview)
+# ENDPOINT 8: Update a review by its ID
+@router.patch("/update/{review_id}", response_model=ReadReview)
 def update_review_by_id(review_id: str, update: UpdateReview, session: Session = Depends(get_session)):
     review = session.get(Review, review_id)
 
@@ -107,7 +147,8 @@ def update_review_by_id(review_id: str, update: UpdateReview, session: Session =
     return review
 
 
-@router.delete("/{review_id}")
+# EndPOINT 9: Delete a review by its ID
+@router.delete("/delete/{review_id}")
 def delete_review_by_id(review_id: str, session: Session = Depends(get_session)):
     review = session.get(Review, review_id)
 
@@ -121,6 +162,3 @@ def delete_review_by_id(review_id: str, session: Session = Depends(get_session))
     return {
         "message": "Review Deleted."
     }
-
-
-# TODO: endpoint for top 3 plays.
