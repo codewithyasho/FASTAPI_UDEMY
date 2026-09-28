@@ -162,3 +162,38 @@ def delete_review_by_id(review_id: str, session: Session = Depends(get_session))
     return {
         "message": "Review Deleted."
     }
+
+
+# ENDPOINT 10: Get the most frequent reviewer
+
+@router.get(
+    "/top-reviewer",
+    description="Get the reviewer who has submitted the most reviews"
+)
+def get_most_frequent_reviewer(
+    session: Session = Depends(get_session)
+):
+    query = (
+        select(
+            Review.reviewer_name,
+            func.count(Review.id).label("review_count")
+        )
+        .group_by(Review.reviewer_name)
+        .order_by(func.count(Review.id).desc())
+        .limit(1)
+    )
+
+    result = session.exec(query).first()
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="No reviews found."
+        )
+
+    reviewer_name, review_count = result
+
+    return {
+        "reviewer_name": reviewer_name,
+        "review_count": review_count
+    }
