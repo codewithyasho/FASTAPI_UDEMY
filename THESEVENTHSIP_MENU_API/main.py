@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query, HTTPException
 import uvicorn
-from models import MenuItem, MenuResponse
+from models import SingleMenuItem, MultiMenuItems
 from data import menu_items
 
 app = FastAPI(
@@ -18,12 +18,12 @@ def root():
     }
 
 
-@app.get("/menu", response_model=MenuResponse, tags=["menu"])
+@app.get("/menu", response_model=MultiMenuItems, tags=["menu"])
 def get_menu():
-    return MenuResponse(count=len(menu_items), items=menu_items)
+    return MultiMenuItems(count=len(menu_items), items=menu_items)
 
 
-@app.get("/menu/filter", response_model=MenuResponse, tags=["menu"])
+@app.get("/menu/filter", response_model=MultiMenuItems, tags=["menu"])
 def filter_by_category(category: str | None = Query(None, description="filter by shake, cold_coffee, sandwich")):
     if category:
         filtered_items = [
@@ -33,19 +33,19 @@ def filter_by_category(category: str | None = Query(None, description="filter by
             raise HTTPException(
                 status_code=404, detail=f"Category doesn't exist: {category}")
 
-        return MenuResponse(count=len(filtered_items), items=filtered_items)
+        return MultiMenuItems(count=len(filtered_items), items=filtered_items)
 
     raise HTTPException(
         status_code=400, detail=f"Please provide category parameter...")
 
 
-@app.get("/menu/sort", response_model=MenuResponse, tags=["menu"])
+@app.get("/menu/sort", response_model=MultiMenuItems, tags=["menu"])
 def sort_by_price():
     sorted_items = sorted(menu_items, key=lambda x: x["price"])
-    return MenuResponse(count=len(sorted_items), items=sorted_items)
+    return MultiMenuItems(count=len(sorted_items), items=sorted_items)
 
 
-@app.get("/menu/{item_id}", response_model=MenuItem, tags=["menu"])
+@app.get("/menu/{item_id}", response_model=SingleMenuItem, tags=["menu"])
 def get_item(item_id: int):
     for item in menu_items:
         if item["id"] == item_id:
@@ -56,4 +56,4 @@ def get_item(item_id: int):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=8100, reload=True)

@@ -63,20 +63,23 @@ def update_book(
     if not api_key:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    book = session.get(Book, book_id)
-    if not book:
+    get_book = session.get(Book, book_id)
+
+    if not get_book:
         raise HTTPException(status_code=404, detail="Book not found")
 
+    # here not using model_validate because we are not creating a new Book object.
+    #
     book_data = update_book_data.model_dump(exclude_unset=True)
 
     for key, value in book_data.items():
-        setattr(book, key, value)
+        setattr(get_book, key, value)
 
-    session.add(book)
+    session.add(get_book)
     session.commit()
-    session.refresh(book)
+    session.refresh(get_book)
 
-    return book
+    return get_book
 
 
 # endpoint for marking a book as sold
@@ -89,16 +92,16 @@ def mark_book_as_sold(
     if not api_key:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    book = session.get(Book, book_id)
-    if not book:
+    get_book = session.get(Book, book_id)
+    if not get_book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    book.is_sold = True
-    session.add(book)
+    get_book.is_sold = True
+    session.add(get_book)
     session.commit()
-    session.refresh(book)
+    session.refresh(get_book)
 
-    return book
+    return get_book
 
 
 # endpoint for deleting a book
@@ -111,11 +114,26 @@ def delete_book(
     if not api_key:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    book = session.get(Book, book_id)
-    if not book:
+    get_book = session.get(Book, book_id)
+    if not get_book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    session.delete(book)
+    session.delete(get_book)
     session.commit()
 
-    return book
+    return get_book
+
+
+# ALWAYS REMEMBER:
+'''
+POST → creating a NEW DB object
+       ↓
+       model_validate()
+
+PATCH → updating an EXISTING DB object
+       ↓
+       model_dump(exclude_unset=True)
+       ↓
+       update only sent fields
+'''
+

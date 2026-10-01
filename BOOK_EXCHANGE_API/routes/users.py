@@ -43,4 +43,15 @@ def list_users(session: Session = Depends(get_session)):
     return users
 
 
-# endpoint 
+# ALWAYS REMEMBER:
+'''
+POST → creating a NEW DB object
+       ↓
+       model_validate()
+
+PATCH → updating an EXISTING DB object
+       ↓
+       model_dump(exclude_unset=True)
+       ↓
+       update only sent fields
+'''

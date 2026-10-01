@@ -76,13 +76,12 @@ async def request_info(request: Request):
 
 @app.get(
     "/orders/active",
-    summary="Get Active Orders",
+    summary="Get Active Orders quickly",
     description=(
         """Returns all the orders that are currently being prepared or out of delivery"""
     ),
     tags=["orders"],
     response_description="List of active order objects",
-    deprecated=False
 )
 def get_active_order():
     return {

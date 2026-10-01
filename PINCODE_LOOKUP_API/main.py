@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query, HTTPException
 import uvicorn
 from exceptions import PinCodeNotFoundError, pincode_not_found_handler, InvalidPinCodeError, invalid_pincode_handler
 from models import PincodeRequest, PincodeResponse, BulkResquest, BulkResponse
@@ -23,7 +23,7 @@ def root():
     }
 
 
-# if it is a get request, we will send the pincode in the url path.
+# EXAMPLE 1: we will send the pincode in the path parameter.
 @app.get("/pincode/{code}", response_model=PincodeResponse)
 def pincode_lookup(code: str):
     if len(code) != 6 or not code.isdigit():
@@ -35,7 +35,20 @@ def pincode_lookup(code: str):
     return pincode_db[code]
 
 
-# if it is a post request, we will send the pincode in the request body in JSON format.
+# EXAMPLE 2: we will send the pincode in the query parameter.
+@app.get("/pincode", response_model=PincodeResponse)
+def pincode_lookup2(code: str | None = Query(None, description="Enter the pincode")):
+    if code:
+        if len(code) != 6 or not code.isdigit():
+            raise PinCodeNotFoundError(code)
+
+        if code not in pincode_db:
+            raise PinCodeNotFoundError(code)
+
+        return pincode_db[code]
+
+
+# in post request, we will send the pincode in the request body in JSON format.
 @app.post("/pincode", response_model=PincodeResponse)
 def pincode_lookup_post(request: PincodeRequest):
     code = request.pincode

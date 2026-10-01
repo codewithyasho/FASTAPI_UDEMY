@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Book Exchange API",
-    description="An API for exchanging books between users.",
+    description="API is designed for a book marketplace, where users create books and sell them.",
     version="1.0.0",
     lifespan=lifespan
 )

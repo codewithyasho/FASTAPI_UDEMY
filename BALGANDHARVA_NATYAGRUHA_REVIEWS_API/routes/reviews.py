@@ -59,10 +59,11 @@ def filter_reviews(
     return reviews
 
 
-# ENDPOINT 4: This endpoint CREATE, SAVE and DISPLAYS a single new review sent by a user
+# ENDPOINT 4: This endpoint CREATE, SAVE and DISPLAYS a single new review sent by a user in the db.
 @router.post("/create", response_model=ReadReview, description="Create a new review for a play")
 def create_review(review: CreateReview, session: Session = Depends(get_session)):
 
+    # converts pydantic object into unpacked dictionary.
     db_review = Review(**review.model_dump())
     session.add(db_review)
     session.commit()
@@ -135,9 +136,13 @@ def update_review_by_id(review_id: str, update: UpdateReview, session: Session =
         raise HTTPException(
             status_code=404, detail=f"NO review found of id: {review_id}")
 
+    # exclude_unset=True ensures that only the fields provided in the update request are included in the update_data dictionary.
+    # keep default values as it is.
     update_data = update.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
+        # setattr(): means "set attribute" that allows you to set the value of an attribute of an object dynamically.
+        # it is used to update the attributes of the review object with the new values provided in the update request.
         setattr(review, key, value)
 
     session.add(review)
@@ -197,3 +202,34 @@ def get_most_frequent_reviewer(
         "reviewer_name": reviewer_name,
         "review_count": review_count
     }
+
+
+# NOT RECOMMENDED APPROACH FOR CREATING REVIEW:
+'''
+@router.post(
+    "/create",
+    response_model=ReadReview,
+    description="Create a new review for a play"
+)
+def create_review2(
+    play_name: str,
+    reviewer_name: str,
+    rating: float,
+    comment: str,
+    session: Session = Depends(get_session)
+):
+
+    db_review = Review(
+        play_name=play_name,
+        reviewer_name=reviewer_name,
+        rating=rating,
+        comment=comment
+    )
+
+    session.add(db_review)
+    session.commit()
+    session.refresh(db_review)
+
+    return db_review
+
+'''

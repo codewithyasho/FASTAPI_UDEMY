@@ -3,6 +3,9 @@ from fastapi import FastAPI
 import uvicorn
 from database import create_tables
 from routes.reviews import router as reviews_router
+from fastapi.exceptions import RequestValidationError
+
+from exceptions import validation_exception_handler
 
 
 @asynccontextmanager
@@ -26,6 +29,11 @@ app = FastAPI(
 
 # anything that starts from '/review' will auto handle by this routing config.
 app.include_router(reviews_router)
+
+app.add_exception_handler(
+    RequestValidationError,
+    validation_exception_handler
+)
 
 
 @app.get("/")

@@ -9,7 +9,7 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 
 @router.post("/", response_model=Order)
 def create_order(order: CreateOrder, session: Session = Depends(get_session)):
-    order_db = Order(**order.model_dump())
+    order_db = Order.model_validate(order)
     session.add(order_db)
     session.commit()
     session.refresh(order_db)
@@ -51,7 +51,7 @@ def update_order(
     order_update: UpdateOrder,
     session: Session = Depends(get_session)
 ):
-    # Find the order
+    # Find the order by id
     order = session.get(Order, order_id)
 
     # If order doesn't exist

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class MenuItem(BaseModel):
+class SingleMenuItem(BaseModel):
     id: int
     name: str
     category: str
@@ -10,7 +10,7 @@ class MenuItem(BaseModel):
     available: bool
 
 
-class MenuResponse(BaseModel):
+class MultiMenuItems(BaseModel):
     status: str = "success"
     count: int
-    items: list[MenuItem]
+    items: list[SingleMenuItem]

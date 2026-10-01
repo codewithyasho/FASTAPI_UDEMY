@@ -11,6 +11,7 @@ class Book(SQLModel, table=True):
 
     # foreign key to user table
     user_id: int = Field(foreign_key="user.id")
+    # one book can have one owner
     owner: Optional["User"] = Relationship(back_populates="books")
 
 
